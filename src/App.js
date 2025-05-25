@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with responsive layout using CSS media queries ===
+// === FRONTEND (React Component: App.js) with dynamic card color ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -29,6 +29,17 @@ function App() {
       socket.off('chatMessage');
     };
   }, []);
+
+  const getCardColor = (color) => {
+    switch (color) {
+      case 'Red': return '#ff4d4d';
+      case 'Blue': return '#4d79ff';
+      case 'Green': return '#4dff88';
+      case 'Yellow': return '#ffff4d';
+      case 'Wild': return '#ffffff';
+      default: return '#222';
+    }
+  };
 
   const createRoom = () => {
     socket.emit('createRoom', { playerName: name });
@@ -131,6 +142,7 @@ function App() {
                     key={i}
                     onClick={() => selectCard(card)}
                     className={`cyberpunk-card ${cardToDiscard === card ? 'selected-card' : ''}`}
+                    style={{ backgroundColor: getCardColor(card.color) }}
                   >
                     {card.value}
                   </div>
