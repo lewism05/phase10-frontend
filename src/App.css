@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
-/* Base layout */
+/* Base Styles */
 body, .app-container {
   font-family: 'Rajdhani', sans-serif;
   background-color: #0a0a1a;
   color: #e0e0ff;
   min-height: 100vh;
-  padding: 2rem;
-  overflow-x: hidden;
+  padding: 1rem;
+  margin: 0;
 }
 
 .grid-pattern {
@@ -20,16 +20,16 @@ body, .app-container {
 /* Typography */
 .game-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 3rem;
+  font-size: 2.2rem;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   text-shadow: 0 0 10px #00f0ff, 0 0 20px #00a2ff;
 }
 
 .section-title {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #ff00f0;
 }
 
@@ -39,12 +39,13 @@ body, .app-container {
   color: #0a0a1a;
   font-weight: bold;
   border: none;
-  padding: 10px 20px;
+  padding: 10px;
   border-radius: 6px;
-  margin: 6px;
+  margin: 6px 0;
   cursor: pointer;
   box-shadow: 0 0 10px #00a2ff;
   transition: all 0.3s ease;
+  width: 100%;
 }
 
 .neon-button:hover {
@@ -57,145 +58,102 @@ body, .app-container {
   background-color: #111;
   color: #fff;
   border: 1px solid #00f0ff;
-  padding: 10px 15px;
+  padding: 10px;
   border-radius: 5px;
-  margin: 8px;
-  width: 250px;
+  margin: 6px 0;
+  width: 100%;
 }
 
 /* Cards */
 .cyberpunk-card {
-  width: 100px;
-  height: 140px;
-  flex: 0 0 auto;
-  perspective: 1000px;
+  width: 60px;
+  height: 85px;
   background: linear-gradient(135deg, #1a0033, #33001a);
-  border-radius: 10px;
-  box-shadow: 0 0 15px #ff00a0;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #ff00a0;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #00f0ff;
   font-weight: bold;
-  font-size: 2rem;
+  font-size: 1.2rem;
   border: 1px solid #00f0ff;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
+  flex: 1 1 20%;
+  margin: 4px;
 }
 
 .cyberpunk-card:hover {
-  transform: translateY(-10px) rotate(2deg);
-  box-shadow: 0 0 25px #00f0ff;
+  transform: translateY(-6px);
+  box-shadow: 0 0 15px #00f0ff;
 }
 
 .selected-card {
-  transform: translateY(-10px) scale(1.05);
   background: linear-gradient(135deg, #ff00f0, #00f0ff);
-  box-shadow: 0 0 25px #ff00f0;
   color: #0a0a1a;
+  box-shadow: 0 0 20px #ff00f0;
 }
 
-/* Layout blocks */
+/* Layout Containers */
 .input-section,
 .players-list,
-.card-row,
-.button-group,
+.card-play-area,
 .chat-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
-}
-
-.card-row-horizontal {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 10px;
-  width: 100%;
-  max-width: 100%;
-  scroll-snap-type: x mandatory;
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
 }
 
 .status-text {
   text-align: center;
   margin: 1rem 0;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #00f0ff;
 }
 
+.card-row-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
 .chat-log {
-  max-height: 150px;
-  overflow-y: auto;
   background: #111;
   border: 1px solid #444;
   padding: 10px;
   width: 100%;
-  max-width: 500px;
-  margin-bottom: 1rem;
+  max-width: 350px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .chat-input {
   display: flex;
+  flex-direction: column;
+  width: 100%;
   gap: 8px;
-  justify-content: center;
+  max-width: 350px;
 }
 
 .skip-modal {
   background: #111;
   border: 2px solid #ff00f0;
-  padding: 20px;
+  padding: 1rem;
+  margin-top: 1rem;
   border-radius: 8px;
   box-shadow: 0 0 15px #ff00f0;
-  margin: 20px auto;
-  max-width: 300px;
+  max-width: 320px;
   text-align: center;
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .card-row-horizontal {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    padding: 1rem 0;
-    scroll-snap-type: x mandatory;
-  }
-
-  .cyberpunk-card {
-    scroll-snap-align: start;
-  }
-
-  .button-group,
-  .responsive-buttons {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .chat-input {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .input-section,
-  .chat-section,
-  .card-play-area {
-    padding: 1rem;
-  }
-
-  .neon-button,
-  .text-input {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .game-title {
-    font-size: 2rem;
-    padding: 0 1rem;
-    text-align: center;
-  }
 }
