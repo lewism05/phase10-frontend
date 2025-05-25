@@ -74,33 +74,62 @@ function App() {
     return (
       <div>
         <h1>Phase 10 Online</h1>
-        <input placeholder=\"Your name\" value={name} onChange={e => setName(e.target.value)} />
+        <input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
         <button onClick={createRoom}>Create Room</button>
-        <input placeholder=\"Room ID\" value={roomId} onChange={e => setRoomId(e.target.value)} />
+        <input placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} />
         <button onClick={joinRoom}>Join Room</button>
       </div>
     );
   }
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Room: {game.roomId}</h2>
-      <h3>Players:</h3>
-      <ul>
-        {game.players.map((p, idx) => (
-          <li key={p.id} style={{ fontWeight: game.currentTurn === idx ? 'bold' : 'normal' }}>
-            {p.name} ({p.hand.length} cards){p.phaseComplete ? ' ✅' : ''}
-          </li>
-        ))}
-      </ul>
-      {!game.started && <button onClick={startGame}>Start Game</button>}
+ return (
+  <div style={{ padding: 20 }}>
+    <h2>Room: {game.roomId}</h2>
+    <h3>Players:</h3>
+    <ul>
+      {game.players.map((p, idx) => (
+        <li key={p.id} style={{ fontWeight: game.currentTurn === idx ? 'bold' : 'normal' }}>
+          {p.name} ({p.hand.length} cards){p.phaseComplete ? ' ✅' : ''}
+        </li>
+      ))}
+    </ul>
+    {!game.started && <button onClick={startGame}>Start Game</button>}
 
-      {game.started && isMyTurn && (
+    {game.started && isMyTurn && (
+      <div>
+        <h3>Your Hand</h3>
         <div>
-          <h3>Your Hand</h3>
-          <div>
-            {me.hand.map((card, i) => (
-              <button
-                key={i}
-                onClick={() => toggleSelect(card)}
-                style={{ margin: 2,
+          {me.hand.map((card, i) => (
+            <button
+              key={i}
+              onClick={() => toggleSelect(card)}
+              style={{
+                margin: 2,
+                backgroundColor: selected.includes(card) ? 'lightgreen' : ''
+              }}
+            >
+              {card.color} {card.value}
+            </button>
+          ))}
+        </div>
+        <div style={{ marginTop: 10 }}>
+          <button onClick={() => draw('deck')}>Draw from Deck</button>
+          <button onClick={() => draw('discard')}>Draw from Discard</button>
+          <button onClick={layPhase}>Lay Down Phase</button>
+        </div>
+      </div>
+    )}
+
+    <div style={{ marginTop: 20 }}>
+      <h4>Chat</h4>
+      <div style={{ border: '1px solid #ccc', height: 150, overflowY: 'scroll', padding: 10 }}>
+        {chatLog.map((line, i) => <p key={i}>{line}</p>)}
+      </div>
+      <input value={chatInput} onChange={e => setChatInput(e.target.value)} />
+      <button onClick={sendChat}>Send</button>
+    </div>
+    </div>
+ );
+}
+
+export default App;
