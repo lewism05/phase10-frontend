@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with clickable discard pile, styled draw pile, and updated title ===
+// === FRONTEND (React Component: App.js) with visible discard and mobile-fit hand ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -157,21 +157,34 @@ function App() {
                 <div
                   className="cyberpunk-card"
                   onClick={discard}
-                  style={{ cursor: selected.length === 1 ? 'pointer' : 'default', opacity: selected.length === 1 ? 1 : 0.4 }}
+                  style={{
+                    backgroundColor: getCardColor(topDiscard?.color),
+                    cursor: selected.length === 1 ? 'pointer' : 'default',
+                    opacity: selected.length === 1 ? 1 : 0.6
+                  }}
                 >
                   {topDiscard ? topDiscard.value : '⬛'}
                 </div>
               </div>
 
               {isMyTurn && (
-                <div className="card-play-area">
-                  <div className="card-row-horizontal">
+                <div className="card-play-area" style={{ overflowX: 'auto' }}>
+                  <div
+                    className="card-row-horizontal"
+                    style={{ justifyContent: sortedHand.length > 5 ? 'flex-start' : 'center', flexWrap: 'nowrap' }}
+                  >
                     {sortedHand.map((card, i) => (
                       <div
                         key={i}
                         onClick={() => toggleSelect(card)}
                         className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
-                        style={{ backgroundColor: getCardColor(card.color) }}
+                        style={{
+                          backgroundColor: getCardColor(card.color),
+                          minWidth: '50px',
+                          height: '70px',
+                          fontSize: '1.2rem',
+                          flex: '0 0 auto'
+                        }}
                       >
                         {card.value}
                       </div>
