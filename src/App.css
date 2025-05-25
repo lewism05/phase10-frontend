@@ -1,32 +1,131 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
-/* Base Styles */
+/* Base layout */
 body, .app-container {
   font-family: 'Rajdhani', sans-serif;
   background-color: #0a0a1a;
   color: #e0e0ff;
-  margin: 0;
+  min-height: 100vh;
   padding: 1rem;
-  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Typography */
+/* Titles */
 .game-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 2rem;
+  font-size: 1.6rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   text-shadow: 0 0 10px #00f0ff;
 }
 
 .section-title {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   text-align: center;
   margin-bottom: 0.5rem;
   color: #ff00f0;
 }
 
-/* Buttons */
+/* Player area */
+.top-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.phase-display {
+  flex: 2;
+  text-align: center;
+}
+
+/* Card styling */
+.cyberpunk-card {
+  width: 60px;
+  height: 90px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.4rem;
+  margin: 4px;
+  color: #fff;
+  border: 2px solid white;
+}
+
+/* Discard/Draw Piles */
+.pile-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin: 20px auto;
+}
+
+/* Hand area fixed to bottom */
+.card-play-area {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #0a0a1a;
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #222;
+}
+
+.card-row-horizontal {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0 1rem;
+}
+
+/* Chat */
+.chat-section {
+  margin-top: auto;
+  padding-bottom: 120px; /* Leave room for hand cards */
+}
+
+.chat-log {
+  max-height: 120px;
+  overflow-y: auto;
+  background: #111;
+  border: 1px solid #444;
+  padding: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.chat-input {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+}
+
+.text-input {
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #00f0ff;
+  padding: 8px;
+  border-radius: 4px;
+  flex: 1;
+}
+
 .neon-button {
   background: linear-gradient(45deg, #ff00f0, #00f0ff);
   color: #0a0a1a;
@@ -34,11 +133,9 @@ body, .app-container {
   border: none;
   padding: 10px;
   border-radius: 6px;
-  margin: 6px 0;
   cursor: pointer;
   box-shadow: 0 0 10px #00a2ff;
   transition: all 0.3s ease;
-  width: 100%;
 }
 
 .neon-button:hover {
@@ -46,117 +143,12 @@ body, .app-container {
   box-shadow: 0 0 15px #ff00a0;
 }
 
-/* Inputs */
-.text-input {
-  background-color: #111;
-  color: #fff;
-  border: 1px solid #00f0ff;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 6px 0;
-  width: 100%;
-}
-
-/* Card Styles */
-.cyberpunk-card {
-  width: 80px;
-  height: 120px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.5rem;
-  margin: 6px;
-  flex: 0 0 auto;
-  background-color: #ff4d4d; /* Example color */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-.card-red { background-color: #ff4d4d; }
-.card-blue { background-color: #4d79ff; }
-.card-green { background-color: #4dff88; }
-.card-yellow { background-color: #ffff4d; }
-
-}
-
-.cyberpunk-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-}
-
-.selected-card {
-  background: linear-gradient(135deg, #ff00f0, #00f0ff);
-  color: #0a0a1a;
-  box-shadow: 0 0 20px #ff00f0;
-}
-
-/* Layout Containers */
-.input-section,
-.players-list,
-.card-play-area,
-.chat-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 0.5rem;
-}
-
-.status-text {
-  text-align: center;
-  margin: 1rem 0;
-  font-size: 1rem;
-  color: #00f0ff;
-}
-
-.card-row-horizontal {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.chat-log {
-  background: #111;
-  border: 1px solid #444;
-  padding: 10px;
-  width: 100%;
-  max-width: 350px;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-.chat-input {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 8px;
-  max-width: 350px;
-}
-
+/* Skip modal */
 .skip-modal {
   background: #111;
   border: 2px solid #ff00f0;
   padding: 1rem;
-  margin-top: 1rem;
   border-radius: 8px;
   box-shadow: 0 0 15px #ff00f0;
-  max-width: 320px;
   text-align: center;
-}
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 10px;
 }
