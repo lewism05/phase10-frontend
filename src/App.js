@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) ===
+// === FRONTEND (React Component: App.js) with Neon Phase Theme ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -18,6 +18,7 @@ function App() {
     socket.on('gameStarted', setGame);
     socket.on('gameStateUpdate', setGame);
     socket.on('chatMessage', data => setChatLog(log => [...log, `${data.player}: ${data.message}`]));
+    playBGM();
     return () => {
       socket.off('roomUpdate');
       socket.off('gameStarted');
@@ -82,64 +83,75 @@ function App() {
     audio.play();
   };
 
+  const playBGM = () => {
+    const audio = new Audio('https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/KieLoKaz/A_Wonderful_Kind_Of_Imperfect/KieLoKaz_-_07_-_Cyber_Raptor.mp3');
+    audio.loop = true;
+    audio.volume = 0.05;
+    audio.play();
+  };
+
   const me = game?.players.find(p => p.name === name);
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
 
   return (
-    <div style={{ padding: 20, fontFamily: 'Orbitron, sans-serif', color: '#00ffe7', backgroundColor: '#0e0e0e', minHeight: '100vh', backgroundImage: 'radial-gradient(circle at center, #1a1a1a, #0e0e0e)', backgroundRepeat: 'no-repeat' }}>
-      <h1 style={{ textAlign: 'center', color: '#ff00c8', textShadow: '0 0 10px #ff00c8' }}>Cyberpunk 10</h1>
+    <div style={styles.page}>
+      <h1 style={styles.title}>Neon Phase 10</h1>
 
       {!game && (
-        <div style={{ textAlign: 'center' }}>
-          <input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
-          <button onClick={createRoom} style={buttonStyle}>Create Room</button>
-          <br /><br />
-          <input placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} style={inputStyle} />
-          <button onClick={joinRoom} style={buttonStyle}>Join Room</button>
+        <div style={styles.centeredBox}>
+          <input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} style={styles.input} />
+          <button onClick={createRoom} style={styles.button}>Create Room</button>
+          <input placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} style={styles.input} />
+          <button onClick={joinRoom} style={styles.button}>Join Room</button>
         </div>
       )}
 
       {game && (
         <>
-          <h2>Room: {game.roomId}</h2>
-          <ul>
+          <div style={styles.status}>Room: {game.roomId}</div>
+          <div style={styles.playersList}>
             {game.players.map((p, idx) => (
-              <li key={p.id} style={{ fontWeight: game.currentTurn === idx ? 'bold' : 'normal', textShadow: '0 0 5px #8f00ff' }}>
+              <div key={p.id} style={{ fontWeight: game.currentTurn === idx ? 'bold' : 'normal' }}>
                 {p.name} ({p.hand.length} cards){p.phaseComplete ? ' ✅' : ''}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
 
-          {!game.started && <button onClick={startGame} style={buttonStyle}>Start Game</button>}
+          {!game.started && <button onClick={startGame} style={styles.button}>Start Game</button>}
 
           {game.started && isMyTurn && (
-            <div>
-              <h3>Your Hand</h3>
-              <div>
+            <>
+              <h3 style={styles.sectionTitle}>Your Hand</h3>
+              <div style={styles.cardRow}>
                 {me.hand.map((card, i) => (
-                  <button
+                  <div
                     key={i}
                     onClick={() => toggleSelect(card)}
-                    style={{ ...buttonStyle, margin: 2, backgroundColor: selected.includes(card) ? '#8f00ff' : '#222' }}>
-                    {card.color} {card.value}
-                  </button>
+                    style={{
+                      ...styles.card,
+                      background: selected.includes(card) ? 'linear-gradient(145deg,#ff00c8,#8f00ff)' : 'rgba(0,0,0,0.4)',
+                      boxShadow: selected.includes(card) ? '0 0 15px #ff00c8' : '0 0 8px #00ffe7'
+                    }}>
+                    <div style={styles.cardText}>{card.color}</div>
+                    <div style={styles.cardValue}>{card.value}</div>
+                  </div>
                 ))}
               </div>
-              <div style={{ marginTop: 10 }}>
-                <button onClick={() => draw('deck')} style={buttonStyle}>Draw from Deck</button>
-                <button onClick={() => draw('discard')} style={buttonStyle}>Draw from Discard</button>
-                <button onClick={layPhase} style={buttonStyle}>Lay Down Phase</button>
+              <div style={styles.controls}>
+                <button onClick={() => draw('deck')} style={styles.button}>Draw Deck</button>
+                <button onClick={() => draw('discard')} style={styles.button}>Draw Discard</button>
+                <button onClick={layPhase} style={styles.button}>Lay Phase</button>
               </div>
-            </div>
+            </>
           )}
 
           <div style={{ marginTop: 20 }}>
-            <h4>Chat</h4>
-            <div style={{ border: '1px solid #444', height: 150, overflowY: 'scroll', padding: 10, backgroundColor: '#111' }}>
+            <h4 style={styles.sectionTitle}>Chat</h4>
+            <div style={styles.chatBox}>
               {chatLog.map((line, i) => <p key={i}>{line}</p>)}
             </div>
-            <input value={chatInput} onChange={e => setChatInput(e.target.value)} style={inputStyle} />
-            <button onClick={sendChat} style={buttonStyle}>Send</button>
+            <input value={chatInput} onChange={e => setChatInput(e.target.value)} style={styles.input} />
+            <button onClick={sendChat} style={styles.button}>Send</button>
           </div>
         </>
       )}
@@ -147,25 +159,93 @@ function App() {
   );
 }
 
-const buttonStyle = {
-  backgroundColor: '#222',
-  color: '#00ffe7',
-  border: '1px solid #00ffe7',
-  padding: '10px 15px',
-  margin: '5px',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  textShadow: '0 0 5px #00ffe7'
-};
-
-const inputStyle = {
-  backgroundColor: '#111',
-  color: '#fff',
-  border: '1px solid #555',
-  padding: '8px 12px',
-  margin: '5px',
-  borderRadius: '4px',
-  width: '200px'
+const styles = {
+  page: {
+    background: 'linear-gradient(180deg, #0e0e0e 0%, #1a1a1a 100%)',
+    backgroundImage: 'url(https://images.unsplash.com/photo-1589782182194-81e6d5f637e0)',
+    backgroundSize: 'cover',
+    minHeight: '100vh',
+    padding: 20,
+    fontFamily: 'Orbitron, sans-serif',
+    color: '#00ffe7'
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: '3rem',
+    color: '#ff00c8',
+    textShadow: '0 0 20px #ff00c8',
+    marginBottom: '2rem'
+  },
+  centeredBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  input: {
+    backgroundColor: '#111',
+    color: '#fff',
+    border: '1px solid #555',
+    padding: '10px',
+    margin: '8px',
+    borderRadius: '6px',
+    width: '240px'
+  },
+  button: {
+    backgroundColor: '#222',
+    color: '#00ffe7',
+    border: '1px solid #00ffe7',
+    padding: '10px 20px',
+    margin: '8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    textShadow: '0 0 5px #00ffe7'
+  },
+  status: {
+    fontSize: '1.2rem',
+    marginBottom: '1rem'
+  },
+  playersList: {
+    marginBottom: '1rem'
+  },
+  sectionTitle: {
+    color: '#ff00c8',
+    marginTop: '1rem'
+  },
+  cardRow: {
+    display: 'flex',
+    gap: '10px',
+    flexWrap: 'wrap'
+  },
+  card: {
+    width: '80px',
+    height: '120px',
+    borderRadius: '10px',
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontWeight: 'bold',
+    color: '#fff',
+    cursor: 'pointer'
+  },
+  cardText: {
+    fontSize: '0.9em',
+    opacity: 0.8
+  },
+  cardValue: {
+    fontSize: '1.4em'
+  },
+  controls: {
+    marginTop: '1rem'
+  },
+  chatBox: {
+    background: '#000',
+    border: '1px solid #333',
+    padding: '10px',
+    maxHeight: '150px',
+    overflowY: 'scroll'
+  }
 };
 
 export default App;
