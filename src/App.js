@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with Draw/Discard Piles, Discard Action, and Name-based Chat ===
+// === FRONTEND (React Component: App.js) with Skip Card Popup, Mobile Layout, and Invite Button ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -13,6 +13,8 @@ function App() {
   const [chatLog, setChatLog] = useState([]);
   const [selected, setSelected] = useState([]);
   const [cardToDiscard, setCardToDiscard] = useState(null);
+  const [showSkipModal, setShowSkipModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     socket.on('roomUpdate', setGame);
@@ -21,11 +23,15 @@ function App() {
     socket.on('chatMessage', data =>
       setChatLog(log => [...log, `${data.playerName || 'Player'}: ${data.message}`])
     );
+
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
     return () => {
       socket.off('roomUpdate');
       socket.off('gameStarted');
       socket.off('gameStateUpdate');
       socket.off('chatMessage');
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -47,10 +53,13 @@ function App() {
 
   const selectCard = (card) => {
     setCardToDiscard(card);
+    if (card.value === 'Skip') {
+      setShowSkipModal(true);
+    }
   };
 
   const discard = () => {
-    if (cardToDiscard) {
+    if (cardToDiscard && cardToDiscard.value !== 'Skip') {
       socket.emit('discardCard', { roomId: game.roomId, card: cardToDiscard });
       setCardToDiscard(null);
       setSelected([]);
@@ -66,6 +75,22 @@ function App() {
     if (chatInput.trim()) {
       socket.emit('chatMessage', { roomId: game.roomId, message: chatInput, playerName: name });
       setChatInput('');
+    }
+  };
+
+  const sendSkipTo = (targetName) => {
+    socket.emit('playSkipCard', { roomId: game.roomId, card: cardToDiscard, target: targetName });
+    setShowSkipModal(false);
+    setCardToDiscard(null);
+  };
+
+  const shareGame = () => {
+    const url = `${window.location.origin}/?room=${game?.roomId}`;
+    if (navigator.share) {
+      navigator.share({ title: 'Join my Cyberpunk 10 game!', url });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Game link copied!');
     }
   };
 
@@ -89,6 +114,8 @@ function App() {
       {game && (
         <>
           <div className="status-text">Room: {game.roomId}</div>
+          {isMobile && <button className="neon-button" onClick={shareGame}>📲 Invite</button>}
+
           <div className="players-list">
             {game.players.map((p, idx) => (
               <div key={p.id} className="player-name">
@@ -117,7 +144,9 @@ function App() {
                 <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
                 <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
                 <button onClick={layPhase} className="neon-button">Lay Phase</button>
-                <button onClick={discard} className="neon-button">Discard</button>
+                {cardToDiscard && cardToDiscard.value !== 'Skip' && (
+                  <button onClick={discard} className="neon-button">Discard</button>
+                )}
               </div>
 
               <div className="pile-display">
@@ -137,6 +166,16 @@ function App() {
               <button onClick={sendChat} className="neon-button">Send</button>
             </div>
           </div>
+
+          {showSkipModal && (
+            <div className="skip-modal">
+              <h3>Select a player to skip:</h3>
+              {game.players.filter(p => p.name !== name).map((p, i) => (
+                <button key={i} className="neon-button" onClick={() => sendSkipTo(p.name)}>{p.name}</button>
+              ))}
+              <button onClick={() => setShowSkipModal(false)} className="neon-button">Cancel</button>
+            </div>
+          )}
         </>
       )}
     </div>
