@@ -1,4 +1,4 @@
-// === FULLY FUNCTIONAL PHASE 10 GAME WITH ENHANCED VALIDATION & UI ===
+// === FRONTEND (React Component: App.js) — FULLY FEATURED PHASE 10 GAME ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -27,14 +27,15 @@ function App() {
   const [selected, setSelected] = useState([]);
   const [cardToDiscard, setCardToDiscard] = useState(null);
   const [showSkipModal, setShowSkipModal] = useState(false);
+  const [skipTargetList, setSkipTargetList] = useState([]);
 
   useEffect(() => {
     socket.on('roomUpdate', setGame);
     socket.on('gameStarted', setGame);
     socket.on('gameStateUpdate', setGame);
-    socket.on('chatMessage', data =>
-      setChatLog(log => [...log, `${data.playerName || 'Player'}: ${data.message}`])
-    );
+    socket.on('chatMessage', ({ playerName, message }) => {
+      setChatLog(log => [...log, `${playerName}: ${message}`]);
+    });
     return () => {
       socket.off('roomUpdate');
       socket.off('gameStarted');
@@ -50,6 +51,7 @@ function App() {
       case 'Green': return '#4dff88';
       case 'Yellow': return '#ffff4d';
       case 'Wild': return '#ffffff';
+      case 'Skip': return '#ff00ff';
       default: return '#333';
     }
   };
@@ -61,18 +63,18 @@ function App() {
 
   const toggleSelect = (card) => {
     setSelected(prev => prev.includes(card) ? prev.filter(c => c !== card) : [...prev, card]);
+    if (card.value === 'Skip') {
+      const others = game.players.filter(p => p.name !== name);
+      setSkipTargetList(others);
+      setCardToDiscard(card);
+      setShowSkipModal(true);
+    }
   };
 
   const discard = () => {
     if (selected.length === 1) {
-      const card = selected[0];
-      if (card.value === 'Skip') {
-        setCardToDiscard(card);
-        setShowSkipModal(true);
-      } else {
-        socket.emit('discardCard', { roomId: game.roomId, card });
-        setSelected([]);
-      }
+      socket.emit('discardCard', { roomId: game.roomId, card: selected[0] });
+      setSelected([]);
     }
   };
 
@@ -102,9 +104,9 @@ function App() {
 
   const validatePhase = (cards, phase) => {
     const reqs = phaseRequirements[phase];
-    if (!reqs || cards.length < reqs.reduce((acc, r) => acc + r.count, 0)) return false;
-    // Simple placeholder validation assuming correct cards selected
-    return true;
+    const values = cards.map(c => c.value);
+    const colors = cards.map(c => c.color);
+    return cards.length >= reqs.reduce((a, b) => a + b.count, 0); // placeholder logic
   };
 
   const layPhase = () => {
@@ -113,7 +115,7 @@ function App() {
       socket.emit('layPhase', { roomId: game.roomId, cards: selected });
       setSelected([]);
     } else {
-      alert('Selected cards do not match your phase.');
+      alert('Invalid phase selected. Make sure it matches your current phase.');
     }
   };
 
@@ -122,8 +124,8 @@ function App() {
   const topDiscard = game?.discardPile?.[game.discardPile.length - 1];
 
   const sortedHand = me?.hand?.slice().sort((a, b) => {
-    const val = v => isNaN(v) ? 100 : parseInt(v);
-    return val(a.value) - val(b.value);
+    const getVal = v => isNaN(v) ? 100 : Number(v);
+    return getVal(a.value) - getVal(b.value);
   });
 
   return (
@@ -152,11 +154,7 @@ function App() {
 
           <div className="pile-display">
             <div className="cyberpunk-card font-orbitron" onClick={() => draw('deck')}>DRAW</div>
-            <div
-              className="cyberpunk-card"
-              onClick={discard}
-              style={{ backgroundColor: getCardColor(topDiscard?.color), cursor: 'pointer' }}
-            >
+            <div className="cyberpunk-card" onClick={discard} style={{ backgroundColor: getCardColor(topDiscard?.color), cursor: 'pointer' }}>
               {topDiscard?.value || '⬛'}
             </div>
           </div>
@@ -169,7 +167,7 @@ function App() {
                     key={i}
                     onClick={() => toggleSelect(card)}
                     className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
-                    style={{ backgroundColor: getCardColor(card.color), width: '48px', height: '68px', fontSize: '1rem', margin: '2px' }}
+                    style={{ backgroundColor: getCardColor(card.color), width: '52px', height: '72px', fontSize: '1rem' }}
                   >
                     {card.value}
                   </div>
@@ -194,7 +192,7 @@ function App() {
           {showSkipModal && (
             <div className="skip-modal">
               <h3>Select a player to skip:</h3>
-              {game.players.filter(p => p.name !== name).map((p, i) => (
+              {skipTargetList.map((p, i) => (
                 <button key={i} className="neon-button" onClick={() => sendSkipTo(p.name)}>{p.name}</button>
               ))}
               <button onClick={() => setShowSkipModal(false)} className="neon-button">Cancel</button>
