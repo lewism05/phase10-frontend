@@ -78,6 +78,7 @@ body, .app-container {
   font-size: 2rem;
   border: 1px solid #00f0ff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 0 0 auto;
 }
 
 .cyberpunk-card:hover {
@@ -104,12 +105,17 @@ body, .app-container {
   margin-bottom: 2rem;
 }
 
-.card-row,
-.players-list,
-.button-group {
-  flex-wrap: wrap;
+.card-row-horizontal {
+  display: flex;
+  flex-direction: row;
   gap: 12px;
   justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 10px;
+}
+
 }
 
 .status-text {
