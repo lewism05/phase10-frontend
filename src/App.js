@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with dynamic card color and fixed layout ===
+// === FRONTEND (React Component: App.js) with multi-select, sorted hand, and fixed layout ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -57,24 +57,29 @@ function App() {
     socket.emit('drawCard', { roomId: game.roomId, from });
   };
 
-  const selectCard = (card) => {
-    setCardToDiscard(card);
-    if (card.value === 'Skip') {
-      setShowSkipModal(true);
+  const toggleSelect = (card) => {
+    if (selected.includes(card)) {
+      setSelected(selected.filter(c => c !== card));
+    } else {
+      setSelected([...selected, card]);
     }
   };
 
   const discard = () => {
-    if (cardToDiscard && cardToDiscard.value !== 'Skip') {
-      socket.emit('discardCard', { roomId: game.roomId, card: cardToDiscard });
-      setCardToDiscard(null);
+    if (selected.length === 1 && selected[0].value !== 'Skip') {
+      socket.emit('discardCard', { roomId: game.roomId, card: selected[0] });
       setSelected([]);
+    } else if (selected.length === 1 && selected[0].value === 'Skip') {
+      setCardToDiscard(selected[0]);
+      setShowSkipModal(true);
     }
   };
 
   const layPhase = () => {
-    socket.emit('layPhase', { roomId: game.roomId, selected });
-    setSelected([]);
+    if (selected.length > 0) {
+      socket.emit('layPhase', { roomId: game.roomId, selected });
+      setSelected([]);
+    }
   };
 
   const sendChat = () => {
@@ -88,6 +93,7 @@ function App() {
     socket.emit('playSkipCard', { roomId: game.roomId, card: cardToDiscard, target: targetName });
     setShowSkipModal(false);
     setCardToDiscard(null);
+    setSelected([]);
   };
 
   const shareGame = () => {
@@ -104,6 +110,11 @@ function App() {
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
   const topDiscard = game?.discardPile?.[game.discardPile.length - 1];
   const isMobile = window.innerWidth < 768;
+
+  const sortedHand = me?.hand?.slice().sort((a, b) => {
+    const getVal = v => isNaN(v) ? 100 : Number(v);
+    return getVal(a.value) - getVal(b.value);
+  });
 
   return (
     <div className="app-container grid-pattern">
@@ -143,11 +154,11 @@ function App() {
               {isMyTurn && (
                 <div className="card-play-area">
                   <div className="card-row-horizontal">
-                    {me.hand.map((card, i) => (
+                    {sortedHand.map((card, i) => (
                       <div
                         key={i}
-                        onClick={() => selectCard(card)}
-                        className={`cyberpunk-card ${cardToDiscard === card ? 'selected-card' : ''}`}
+                        onClick={() => toggleSelect(card)}
+                        className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
                         style={{ backgroundColor: getCardColor(card.color) }}
                       >
                         {card.value}
@@ -158,7 +169,7 @@ function App() {
                     <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
                     <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
                     <button onClick={layPhase} className="neon-button">Lay Phase</button>
-                    {cardToDiscard && cardToDiscard.value !== 'Skip' && (
+                    {selected.length === 1 && selected[0].value !== 'Skip' && (
                       <button onClick={discard} className="neon-button">Discard</button>
                     )}
                   </div>
