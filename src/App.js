@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with Pure CSS Cyberpunk Theme ===
+// === FRONTEND (React Component: App.js) with Pure CSS Cyberpunk Theme (cards aligned horizontally) ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -101,7 +101,7 @@ function App() {
           {game.started && isMyTurn && (
             <div className="card-play-area">
               <h2 className="section-title">Your Hand</h2>
-              <div className="card-row">
+              <div className="card-row-horizontal">
                 {me.hand.map((card, i) => (
                   <div
                     key={i}
