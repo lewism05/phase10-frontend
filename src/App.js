@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with Skip Card Popup, Mobile Layout, and Invite Button ===
+// === FRONTEND (React Component: App.js) with responsive layout using CSS media queries ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -14,7 +14,6 @@ function App() {
   const [selected, setSelected] = useState([]);
   const [cardToDiscard, setCardToDiscard] = useState(null);
   const [showSkipModal, setShowSkipModal] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     socket.on('roomUpdate', setGame);
@@ -23,15 +22,11 @@ function App() {
     socket.on('chatMessage', data =>
       setChatLog(log => [...log, `${data.playerName || 'Player'}: ${data.message}`])
     );
-
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
     return () => {
       socket.off('roomUpdate');
       socket.off('gameStarted');
       socket.off('gameStateUpdate');
       socket.off('chatMessage');
-      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -97,6 +92,7 @@ function App() {
   const me = game?.players.find(p => p.name === name);
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
   const topDiscard = game?.discardPile?.[game.discardPile.length - 1];
+  const isMobile = window.innerWidth < 768;
 
   return (
     <div className="app-container grid-pattern">
@@ -140,7 +136,7 @@ function App() {
                   </div>
                 ))}
               </div>
-              <div className="button-group">
+              <div className="button-group responsive-buttons">
                 <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
                 <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
                 <button onClick={layPhase} className="neon-button">Lay Phase</button>
@@ -148,7 +144,6 @@ function App() {
                   <button onClick={discard} className="neon-button">Discard</button>
                 )}
               </div>
-
               <div className="pile-display">
                 <div className="cyberpunk-card" style={{ opacity: 0.4 }}>🂠</div>
                 <div className="cyberpunk-card">{topDiscard ? topDiscard.value : '⬛'}</div>
