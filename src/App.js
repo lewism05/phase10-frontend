@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with Pure CSS Cyberpunk Theme (cards aligned horizontally) ===
+// === FRONTEND (React Component: App.js) with Draw/Discard Piles, Discard Action, and Name-based Chat ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -12,12 +12,15 @@ function App() {
   const [chatInput, setChatInput] = useState('');
   const [chatLog, setChatLog] = useState([]);
   const [selected, setSelected] = useState([]);
+  const [cardToDiscard, setCardToDiscard] = useState(null);
 
   useEffect(() => {
     socket.on('roomUpdate', setGame);
     socket.on('gameStarted', setGame);
     socket.on('gameStateUpdate', setGame);
-    socket.on('chatMessage', data => setChatLog(log => [...log, `${data.player}: ${data.message}`]));
+    socket.on('chatMessage', data =>
+      setChatLog(log => [...log, `${data.playerName || 'Player'}: ${data.message}`])
+    );
     return () => {
       socket.off('roomUpdate');
       socket.off('gameStarted');
@@ -42,18 +45,15 @@ function App() {
     socket.emit('drawCard', { roomId: game.roomId, from });
   };
 
-  const discard = (card) => {
-    socket.emit('discardCard', { roomId: game.roomId, card });
-    setSelected([]);
+  const selectCard = (card) => {
+    setCardToDiscard(card);
   };
 
-  const toggleSelect = (card) => {
-    const key = card.color + '-' + card.value;
-    const exists = selected.find(c => c.color + '-' + c.value === key);
-    if (exists) {
-      setSelected(selected.filter(c => c.color + '-' + c.value !== key));
-    } else {
-      setSelected([...selected, card]);
+  const discard = () => {
+    if (cardToDiscard) {
+      socket.emit('discardCard', { roomId: game.roomId, card: cardToDiscard });
+      setCardToDiscard(null);
+      setSelected([]);
     }
   };
 
@@ -64,13 +64,14 @@ function App() {
 
   const sendChat = () => {
     if (chatInput.trim()) {
-      socket.emit('chatMessage', { roomId: game.roomId, message: chatInput });
+      socket.emit('chatMessage', { roomId: game.roomId, message: chatInput, playerName: name });
       setChatInput('');
     }
   };
 
   const me = game?.players.find(p => p.name === name);
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
+  const topDiscard = game?.discardPile?.[game.discardPile.length - 1];
 
   return (
     <div className="app-container grid-pattern">
@@ -105,17 +106,23 @@ function App() {
                 {me.hand.map((card, i) => (
                   <div
                     key={i}
-                    onClick={() => toggleSelect(card)}
-                    className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
+                    onClick={() => selectCard(card)}
+                    className={`cyberpunk-card ${cardToDiscard === card ? 'selected-card' : ''}`}
                   >
                     {card.value}
                   </div>
                 ))}
               </div>
               <div className="button-group">
-                <button onClick={() => draw('deck')} className="neon-button">Draw Deck</button>
-                <button onClick={() => draw('discard')} className="neon-button">Draw Discard</button>
+                <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
+                <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
                 <button onClick={layPhase} className="neon-button">Lay Phase</button>
+                <button onClick={discard} className="neon-button">Discard</button>
+              </div>
+
+              <div className="pile-display">
+                <div className="cyberpunk-card" style={{ opacity: 0.4 }}>🂠</div>
+                <div className="cyberpunk-card">{topDiscard ? topDiscard.value : '⬛'}</div>
               </div>
             </div>
           )}
