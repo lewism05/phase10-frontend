@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with visible discard and mobile-fit hand ===
+// === FRONTEND (React Component: App.js) with fixed layPhase and tighter card spacing ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -77,8 +77,7 @@ function App() {
 
   const layPhase = () => {
     if (selected.length > 0) {
-      socket.emit('layPhase', { roomId: game.roomId, selected });
-      setSelected([]);
+      socket.emit('layPhase', { roomId: game.roomId, cards: selected });
     }
   };
 
@@ -168,10 +167,10 @@ function App() {
               </div>
 
               {isMyTurn && (
-                <div className="card-play-area" style={{ overflowX: 'auto' }}>
+                <div className="card-play-area" style={{ overflowX: 'hidden' }}>
                   <div
                     className="card-row-horizontal"
-                    style={{ justifyContent: sortedHand.length > 5 ? 'flex-start' : 'center', flexWrap: 'nowrap' }}
+                    style={{ justifyContent: 'center', flexWrap: 'wrap' }}
                   >
                     {sortedHand.map((card, i) => (
                       <div
@@ -180,10 +179,10 @@ function App() {
                         className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
                         style={{
                           backgroundColor: getCardColor(card.color),
-                          minWidth: '50px',
-                          height: '70px',
-                          fontSize: '1.2rem',
-                          flex: '0 0 auto'
+                          width: '48px',
+                          height: '68px',
+                          fontSize: '1rem',
+                          margin: '2px'
                         }}
                       >
                         {card.value}
