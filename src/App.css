@@ -28,11 +28,11 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
   }
-  to {
-    transform: rotate(360deg);
+  20%, 22%, 24%, 55% {
+    opacity: 0.6;
   }
 }
