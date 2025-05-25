@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with dynamic card color ===
+// === FRONTEND (React Component: App.js) with dynamic card color and fixed layout ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -133,34 +133,38 @@ function App() {
 
           {!game.started && <button onClick={startGame} className="neon-button">Start Game</button>}
 
-          {game.started && isMyTurn && (
-            <div className="card-play-area">
-              <h2 className="section-title">Your Hand</h2>
-              <div className="card-row-horizontal">
-                {me.hand.map((card, i) => (
-                  <div
-                    key={i}
-                    onClick={() => selectCard(card)}
-                    className={`cyberpunk-card ${cardToDiscard === card ? 'selected-card' : ''}`}
-                    style={{ backgroundColor: getCardColor(card.color) }}
-                  >
-                    {card.value}
-                  </div>
-                ))}
-              </div>
-              <div className="button-group responsive-buttons">
-                <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
-                <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
-                <button onClick={layPhase} className="neon-button">Lay Phase</button>
-                {cardToDiscard && cardToDiscard.value !== 'Skip' && (
-                  <button onClick={discard} className="neon-button">Discard</button>
-                )}
-              </div>
+          {game.started && (
+            <>
               <div className="pile-display">
                 <div className="cyberpunk-card" style={{ opacity: 0.4 }}>🂠</div>
                 <div className="cyberpunk-card">{topDiscard ? topDiscard.value : '⬛'}</div>
               </div>
-            </div>
+
+              {isMyTurn && (
+                <div className="card-play-area">
+                  <div className="card-row-horizontal">
+                    {me.hand.map((card, i) => (
+                      <div
+                        key={i}
+                        onClick={() => selectCard(card)}
+                        className={`cyberpunk-card ${cardToDiscard === card ? 'selected-card' : ''}`}
+                        style={{ backgroundColor: getCardColor(card.color) }}
+                      >
+                        {card.value}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="button-group responsive-buttons">
+                    <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
+                    <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
+                    <button onClick={layPhase} className="neon-button">Lay Phase</button>
+                    {cardToDiscard && cardToDiscard.value !== 'Skip' && (
+                      <button onClick={discard} className="neon-button">Discard</button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <div className="chat-section">
