@@ -1,38 +1,137 @@
-.App {
-  text-align: center;
-}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body, .app-container {
+  font-family: 'Rajdhani', sans-serif;
+  background-color: #0a0a1a;
+  color: #e0e0ff;
   min-height: 100vh;
+  padding: 2rem;
+  overflow-x: hidden;
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* Typography */
+.game-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00a2ff;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #ff00f0;
+}
+
+/* Buttons */
+.neon-button {
+  background: linear-gradient(45deg, #ff00f0, #00f0ff);
+  color: #0a0a1a;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  margin: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00a2ff;
+  transition: all 0.3s ease;
+}
+
+.neon-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px #ff00a0;
+}
+
+/* Inputs */
+.text-input {
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #00f0ff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 8px;
+  width: 250px;
+}
+
+/* Cards */
+.cyberpunk-card {
+  width: 100px;
+  height: 140px;
+  perspective: 1000px;
+  background: linear-gradient(135deg, #1a0033, #33001a);
+  border-radius: 10px;
+  box-shadow: 0 0 15px #ff00a0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #00f0ff;
+  font-weight: bold;
+  font-size: 2rem;
+  border: 1px solid #00f0ff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cyberpunk-card:hover {
+  transform: translateY(-10px) rotate(2deg);
+  box-shadow: 0 0 25px #00f0ff;
+}
+
+.selected-card {
+  transform: translateY(-10px) scale(1.05);
+  background: linear-gradient(135deg, #ff00f0, #00f0ff);
+  box-shadow: 0 0 25px #ff00f0;
+  color: #0a0a1a;
+}
+
+/* Layout Blocks */
+.input-section,
+.players-list,
+.card-row,
+.button-group,
+.chat-section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 2rem;
+}
+
+.card-row,
+.players-list,
+.button-group {
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.status-text {
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  color: #00f0ff;
 }
 
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    opacity: 1;
-  }
-  20%, 22%, 24%, 55% {
-    opacity: 0.6;
-  }
+.chat-log {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #111;
+  border: 1px solid #444;
+  padding: 10px;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 1rem;
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
