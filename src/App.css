@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
+/* Base layout */
 body, .app-container {
   font-family: 'Rajdhani', sans-serif;
   background-color: #0a0a1a;
@@ -66,6 +67,7 @@ body, .app-container {
 .cyberpunk-card {
   width: 100px;
   height: 140px;
+  flex: 0 0 auto;
   perspective: 1000px;
   background: linear-gradient(135deg, #1a0033, #33001a);
   border-radius: 10px;
@@ -78,7 +80,6 @@ body, .app-container {
   font-size: 2rem;
   border: 1px solid #00f0ff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  flex: 0 0 auto;
 }
 
 .cyberpunk-card:hover {
@@ -93,7 +94,7 @@ body, .app-container {
   color: #0a0a1a;
 }
 
-/* Layout Blocks */
+/* Layout blocks */
 .input-section,
 .players-list,
 .card-row,
@@ -115,7 +116,6 @@ body, .app-container {
   white-space: nowrap;
   padding-bottom: 10px;
 }
-
 
 .status-text {
   text-align: center;
@@ -141,6 +141,18 @@ body, .app-container {
   justify-content: center;
 }
 
+.skip-modal {
+  background: #111;
+  border: 2px solid #ff00f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px #ff00f0;
+  margin: 20px auto;
+  max-width: 300px;
+  text-align: center;
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
   .card-row-horizontal {
     flex-wrap: nowrap;
@@ -151,7 +163,6 @@ body, .app-container {
   }
 
   .cyberpunk-card {
-    flex: 0 0 auto;
     scroll-snap-align: start;
   }
 
