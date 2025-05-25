@@ -1,9 +1,22 @@
-// === FRONTEND (React Component: App.js) with fixed layPhase and tighter card spacing ===
+// === FRONTEND (React Component: App.js) with Phase Validation Logic ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
 
 const socket = socketClient('https://phase10-backend-6lds.onrender.com');
+
+const phaseRequirements = {
+  1: [{ type: 'set', count: 3 }, { type: 'set', count: 3 }],
+  2: [{ type: 'set', count: 3 }, { type: 'run', count: 4 }],
+  3: [{ type: 'set', count: 4 }, { type: 'run', count: 4 }],
+  4: [{ type: 'run', count: 7 }],
+  5: [{ type: 'run', count: 8 }],
+  6: [{ type: 'run', count: 9 }],
+  7: [{ type: 'set', count: 4 }, { type: 'set', count: 4 }],
+  8: [{ type: 'color', count: 7 }],
+  9: [{ type: 'set', count: 5 }, { type: 'set', count: 2 }],
+  10: [{ type: 'set', count: 5 }, { type: 'set', count: 3 }],
+};
 
 function App() {
   const [name, setName] = useState('');
@@ -41,43 +54,73 @@ function App() {
     }
   };
 
-  const createRoom = () => {
-    socket.emit('createRoom', { playerName: name });
-  };
-
-  const joinRoom = () => {
-    socket.emit('joinRoom', { roomId, playerName: name });
-  };
-
-  const startGame = () => {
-    socket.emit('startGame', { roomId: game.roomId });
-  };
-
-  const draw = (from) => {
-    socket.emit('drawCard', { roomId: game.roomId, from });
-  };
+  const createRoom = () => socket.emit('createRoom', { playerName: name });
+  const joinRoom = () => socket.emit('joinRoom', { roomId, playerName: name });
+  const startGame = () => socket.emit('startGame', { roomId: game.roomId });
+  const draw = (from) => socket.emit('drawCard', { roomId: game.roomId, from });
 
   const toggleSelect = (card) => {
-    if (selected.includes(card)) {
-      setSelected(selected.filter(c => c !== card));
-    } else {
-      setSelected([...selected, card]);
-    }
+    setSelected(prev => prev.includes(card) ? prev.filter(c => c !== card) : [...prev, card]);
   };
 
   const discard = () => {
-    if (selected.length === 1 && selected[0].value !== 'Skip') {
-      socket.emit('discardCard', { roomId: game.roomId, card: selected[0] });
-      setSelected([]);
-    } else if (selected.length === 1 && selected[0].value === 'Skip') {
+    if (selected.length === 1 && selected[0].value === 'Skip') {
       setCardToDiscard(selected[0]);
       setShowSkipModal(true);
+    } else if (selected.length === 1) {
+      socket.emit('discardCard', { roomId: game.roomId, card: selected[0] });
+      setSelected([]);
     }
   };
 
+  const countBy = (arr, keyFn) => {
+    return arr.reduce((acc, item) => {
+      const key = keyFn(item);
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  const validatePhase = (cards, phase) => {
+    const reqs = phaseRequirements[phase];
+    if (!reqs || !cards || cards.length === 0) return false;
+
+    const used = new Set();
+    for (let req of reqs) {
+      let group = [];
+      for (let i = 0; i < cards.length; i++) {
+        if (used.has(i)) continue;
+        group.push(cards[i]);
+        const values = countBy(group, c => c.value);
+        const colors = countBy(group, c => c.color);
+
+        if (req.type === 'set' && Object.keys(values).length === 1 && group.length === req.count) {
+          group.forEach((_, j) => used.add(i - j));
+          break;
+        }
+        if (req.type === 'color' && Object.keys(colors).length === 1 && group.length === req.count) {
+          group.forEach((_, j) => used.add(i - j));
+          break;
+        }
+        if (req.type === 'run' && group.length === req.count) {
+          const nums = group.map(c => parseInt(c.value)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+          if (nums.every((n, j, arr) => j === 0 || n === arr[j - 1] + 1)) {
+            group.forEach((_, j) => used.add(i - j));
+            break;
+          }
+        }
+      }
+    }
+    return used.size >= cards.length;
+  };
+
   const layPhase = () => {
-    if (selected.length > 0) {
+    const player = game.players.find(p => p.name === name);
+    if (validatePhase(selected, player.phase)) {
       socket.emit('layPhase', { roomId: game.roomId, cards: selected });
+      setSelected([]);
+    } else {
+      alert('Invalid phase selection.');
     }
   };
 
@@ -108,7 +151,6 @@ function App() {
   const me = game?.players.find(p => p.name === name);
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
   const topDiscard = game?.discardPile?.[game.discardPile.length - 1];
-  const isMobile = window.innerWidth < 768;
 
   const sortedHand = me?.hand?.slice().sort((a, b) => {
     const getVal = v => isNaN(v) ? 100 : Number(v);
@@ -131,74 +173,39 @@ function App() {
       {game && (
         <>
           <div className="status-text">Room: {game.roomId}</div>
-          {isMobile && <button className="neon-button" onClick={shareGame}>📲 Invite</button>}
-
           <div className="players-list">
-            {game.players.map((p, idx) => (
-              <div key={p.id} className="player-name">
-                {p.name} ({p.hand.length} cards){p.phaseComplete ? ' ✅' : ''}
-              </div>
+            {game.players.map(p => (
+              <div key={p.id}>{p.name} (Phase {p.phase})</div>
             ))}
           </div>
-
           {!game.started && <button onClick={startGame} className="neon-button">Start Game</button>}
 
-          {game.started && (
-            <>
-              <div className="pile-display">
-                <div
-                  className="cyberpunk-card font-orbitron"
-                  onClick={() => draw('deck')}
-                  style={{ opacity: 1, cursor: 'pointer', fontSize: '1rem' }}
-                >
-                  DRAW
-                </div>
-                <div
-                  className="cyberpunk-card"
-                  onClick={discard}
-                  style={{
-                    backgroundColor: getCardColor(topDiscard?.color),
-                    cursor: selected.length === 1 ? 'pointer' : 'default',
-                    opacity: selected.length === 1 ? 1 : 0.6
-                  }}
-                >
-                  {topDiscard ? topDiscard.value : '⬛'}
-                </div>
-              </div>
+          <div className="pile-display">
+            <div className="cyberpunk-card font-orbitron" onClick={() => draw('deck')}>DRAW</div>
+            <div className="cyberpunk-card" onClick={discard} style={{ backgroundColor: getCardColor(topDiscard?.color) }}>{topDiscard?.value || '⬛'}</div>
+          </div>
 
-              {isMyTurn && (
-                <div className="card-play-area" style={{ overflowX: 'hidden' }}>
+          {isMyTurn && (
+            <div className="card-play-area">
+              <div className="card-row-horizontal">
+                {sortedHand.map((card, i) => (
                   <div
-                    className="card-row-horizontal"
-                    style={{ justifyContent: 'center', flexWrap: 'wrap' }}
+                    key={i}
+                    onClick={() => toggleSelect(card)}
+                    className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
+                    style={{ backgroundColor: getCardColor(card.color) }}
                   >
-                    {sortedHand.map((card, i) => (
-                      <div
-                        key={i}
-                        onClick={() => toggleSelect(card)}
-                        className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
-                        style={{
-                          backgroundColor: getCardColor(card.color),
-                          width: '48px',
-                          height: '68px',
-                          fontSize: '1rem',
-                          margin: '2px'
-                        }}
-                      >
-                        {card.value}
-                      </div>
-                    ))}
+                    {card.value}
                   </div>
-                  <div className="button-group responsive-buttons">
-                    <button onClick={layPhase} className="neon-button">Lay Phase</button>
-                  </div>
-                </div>
-              )}
-            </>
+                ))}
+              </div>
+              <div className="button-group responsive-buttons">
+                <button onClick={layPhase} className="neon-button">Lay Phase</button>
+              </div>
+            </div>
           )}
 
           <div className="chat-section">
-            <h3 className="section-title">Chat</h3>
             <div className="chat-log">
               {chatLog.map((line, i) => <p key={i}>{line}</p>)}
             </div>
