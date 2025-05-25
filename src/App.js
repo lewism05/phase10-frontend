@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with Hugging Face Cyberpunk Theme ===
+// === FRONTEND (React Component: App.js) with Pure CSS Cyberpunk Theme ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -73,89 +73,61 @@ function App() {
   const isMyTurn = game?.players[game.currentTurn]?.name === name;
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-[#e0e0ff] font-['Rajdhani'] grid-pattern p-6">
-      <h1 className="text-center text-5xl font-bold neon-text font-['Orbitron'] mb-6">Cyberpunk 10</h1>
+    <div className="app-container grid-pattern">
+      <h1 className="game-title neon-text">CYBERPUNK 10</h1>
 
       {!game && (
-        <div className="flex flex-col items-center gap-4">
-          <input
-            className="w-64 p-3 rounded bg-[#111] text-white border border-cyan-500"
-            placeholder="Your name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <button onClick={createRoom} className="neon-button px-6 py-3 rounded">Create Room</button>
-          <input
-            className="w-64 p-3 rounded bg-[#111] text-white border border-cyan-500"
-            placeholder="Room ID"
-            value={roomId}
-            onChange={e => setRoomId(e.target.value)}
-          />
-          <button onClick={joinRoom} className="neon-button px-6 py-3 rounded">Join Room</button>
+        <div className="input-section">
+          <input className="text-input" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+          <button onClick={createRoom} className="neon-button">Create Room</button>
+          <input className="text-input" placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} />
+          <button onClick={joinRoom} className="neon-button">Join Room</button>
         </div>
       )}
 
       {game && (
         <>
-          <div className="text-center mt-4 text-lg">Room ID: {game.roomId}</div>
-          <div className="flex flex-wrap justify-center gap-4 my-4">
+          <div className="status-text">Room: {game.roomId}</div>
+          <div className="players-list">
             {game.players.map((p, idx) => (
-              <div key={p.id} className="text-cyan-300">
-                {p.name} ({p.hand.length}){p.phaseComplete ? ' ✅' : ''}
+              <div key={p.id} className="player-name">
+                {p.name} ({p.hand.length} cards){p.phaseComplete ? ' ✅' : ''}
               </div>
             ))}
           </div>
 
-          {!game.started && (
-            <div className="text-center">
-              <button onClick={startGame} className="neon-button px-6 py-3 rounded">Start Game</button>
-            </div>
-          )}
+          {!game.started && <button onClick={startGame} className="neon-button">Start Game</button>}
 
           {game.started && isMyTurn && (
-            <div className="mt-8">
-              <h2 className="text-center text-xl font-bold text-purple-400 mb-4">Your Hand</h2>
-              <div className="flex flex-wrap justify-center gap-4">
+            <div className="card-play-area">
+              <h2 className="section-title">Your Hand</h2>
+              <div className="card-row">
                 {me.hand.map((card, i) => (
                   <div
                     key={i}
                     onClick={() => toggleSelect(card)}
-                    className="cyberpunk-card cursor-pointer"
-                    style={{
-                      background: selected.includes(card)
-                        ? 'linear-gradient(135deg,#ff00f0,#00f0ff)'
-                        : undefined,
-                      transform: selected.includes(card)
-                        ? 'translateY(-10px) scale(1.05)'
-                        : undefined
-                    }}
+                    className={`cyberpunk-card ${selected.includes(card) ? 'selected-card' : ''}`}
                   >
                     {card.value}
                   </div>
                 ))}
               </div>
-              <div className="flex justify-center gap-4 mt-6">
-                <button onClick={() => draw('deck')} className="neon-button px-5 py-2 rounded">Draw Deck</button>
-                <button onClick={() => draw('discard')} className="neon-button px-5 py-2 rounded">Draw Discard</button>
-                <button onClick={layPhase} className="neon-button px-5 py-2 rounded">Lay Phase</button>
+              <div className="button-group">
+                <button onClick={() => draw('deck')} className="neon-button">Draw Deck</button>
+                <button onClick={() => draw('discard')} className="neon-button">Draw Discard</button>
+                <button onClick={layPhase} className="neon-button">Lay Phase</button>
               </div>
             </div>
           )}
 
-          <div className="mt-12">
-            <h3 className="text-center text-xl font-bold text-purple-400 mb-4">Chat</h3>
-            <div className="max-w-xl mx-auto bg-[#111] p-4 rounded border border-cyan-500 max-h-40 overflow-y-scroll">
-              {chatLog.map((line, i) => (
-                <p key={i}>{line}</p>
-              ))}
+          <div className="chat-section">
+            <h3 className="section-title">Chat</h3>
+            <div className="chat-log">
+              {chatLog.map((line, i) => <p key={i}>{line}</p>)}
             </div>
-            <div className="flex justify-center gap-4 mt-4">
-              <input
-                className="w-64 p-2 rounded bg-[#111] text-white border border-cyan-500"
-                value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-              />
-              <button onClick={sendChat} className="neon-button px-4 py-2 rounded">Send</button>
+            <div className="chat-input">
+              <input className="text-input" value={chatInput} onChange={e => setChatInput(e.target.value)} />
+              <button onClick={sendChat} className="neon-button">Send</button>
             </div>
           </div>
         </>
