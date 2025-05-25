@@ -57,22 +57,32 @@ body, .app-container {
   width: 100%;
 }
 
-/* Cards */
+/* Card Styles */
 .cyberpunk-card {
-  width: 60px;
-  height: 85px;
-  background: linear-gradient(135deg, #1a0033, #33001a);
-  border-radius: 8px;
-  box-shadow: 0 0 10px #ff00a0;
+  width: 80px;
+  height: 120px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #00f0ff;
+  color: #fff;
   font-weight: bold;
-  font-size: 1.2rem;
-  border: 1px solid #00f0ff;
-  margin: 4px;
-  flex: 1 1 20%;
+  font-size: 1.5rem;
+  margin: 6px;
+  flex: 0 0 auto;
+  background-color: #ff4d4d; /* Example color */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.card-red { background-color: #ff4d4d; }
+.card-blue { background-color: #4d79ff; }
+.card-green { background-color: #4dff88; }
+.card-yellow { background-color: #ffff4d; }
+
+}
+
+.cyberpunk-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .selected-card {
@@ -143,4 +153,10 @@ body, .app-container {
   box-shadow: 0 0 15px #ff00f0;
   max-width: 320px;
   text-align: center;
+}
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 10px;
 }
