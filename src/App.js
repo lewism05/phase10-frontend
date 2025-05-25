@@ -1,4 +1,4 @@
-// === FRONTEND (React Component: App.js) with multi-select, sorted hand, and fixed layout ===
+// === FRONTEND (React Component: App.js) with clickable discard pile, styled draw pile, and updated title ===
 import React, { useEffect, useState } from 'react';
 import socketClient from 'socket.io-client';
 import './App.css';
@@ -99,7 +99,7 @@ function App() {
   const shareGame = () => {
     const url = `${window.location.origin}/?room=${game?.roomId}`;
     if (navigator.share) {
-      navigator.share({ title: 'Join my Cyberpunk 10 game!', url });
+      navigator.share({ title: 'Join my Cyber 10 game!', url });
     } else {
       navigator.clipboard.writeText(url);
       alert('Game link copied!');
@@ -118,7 +118,7 @@ function App() {
 
   return (
     <div className="app-container grid-pattern">
-      <h1 className="game-title neon-text">CYBERPUNK 10</h1>
+      <h1 className="game-title neon-text">CYBER 10</h1>
 
       {!game && (
         <div className="input-section">
@@ -147,8 +147,20 @@ function App() {
           {game.started && (
             <>
               <div className="pile-display">
-                <div className="cyberpunk-card" style={{ opacity: 0.4 }}>🂠</div>
-                <div className="cyberpunk-card">{topDiscard ? topDiscard.value : '⬛'}</div>
+                <div
+                  className="cyberpunk-card font-orbitron"
+                  onClick={() => draw('deck')}
+                  style={{ opacity: 1, cursor: 'pointer', fontSize: '1rem' }}
+                >
+                  DRAW
+                </div>
+                <div
+                  className="cyberpunk-card"
+                  onClick={discard}
+                  style={{ cursor: selected.length === 1 ? 'pointer' : 'default', opacity: selected.length === 1 ? 1 : 0.4 }}
+                >
+                  {topDiscard ? topDiscard.value : '⬛'}
+                </div>
               </div>
 
               {isMyTurn && (
@@ -166,12 +178,7 @@ function App() {
                     ))}
                   </div>
                   <div className="button-group responsive-buttons">
-                    <button onClick={() => draw('deck')} className="neon-button">Draw Pile</button>
-                    <button onClick={() => draw('discard')} className="neon-button">Discard Pile</button>
                     <button onClick={layPhase} className="neon-button">Lay Phase</button>
-                    {selected.length === 1 && selected[0].value !== 'Skip' && (
-                      <button onClick={discard} className="neon-button">Discard</button>
-                    )}
                   </div>
                 </div>
               )}
